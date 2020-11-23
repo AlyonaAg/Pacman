@@ -125,3 +125,10 @@ public:
 	void HideCursor()const;
 	void SetCursor(size_t x, size_t y)const;
 };
+
+
+class Game
+{
+public: 
+	void StartGame();
+};
