@@ -5,6 +5,7 @@
 #include <iostream> 
 #include <algorithm> 
 #include <ctime>
+#include <iomanip>
 #include "pacman.h"
 
 Field::Field()
@@ -67,8 +68,8 @@ void Field::Show()const
 	for (size_t i = 0; i < HEIGH; i++)
 	{
 		for (size_t j = 0; j < WIDTH; j++)
-			printf("%c", a_play_field_[i][j]);
-		printf("\n");
+			std::cout<<a_play_field_[i][j];
+		std::cout << std::endl;
 	}
 }
 
@@ -454,4 +455,61 @@ void Coin::SetPrevSymbol(char symbol)
 char Coin::GetPrevSymbol(const Field &field)const
 {
 	return a_prev_symbol_;
+}
+
+
+void Game::StartGame()
+{
+	srand(time(NULL));
+
+	Field field;
+	Cursor cursor;
+	Pacman pacman;
+	Ghost* a_mas_ghost_;
+
+	pacman.InitPacman(field);
+	a_mas_ghost_ = new Ghost[COUNT_GHOST];
+	for (int i = 0; i < COUNT_GHOST; i++)
+		a_mas_ghost_[i].InitGhost(field);
+
+	cursor.HideCursor();
+	while (1)
+	{
+		pacman.Move(field);
+
+		for (int i = 0; i < COUNT_GHOST; i++)
+			a_mas_ghost_[i].Move(field);
+
+		field.CheckCollision(a_mas_ghost_, pacman);
+
+		for (int i = 0; i < MAX_COUNT_COIN; i++)
+			field.CheckCoin((field.GetMasCoin())[i], pacman);
+
+		field.Show();
+		if (!pacman.GetChase())
+			std::cout << "SCORE: " << std::setw(3) << pacman.GetFood() << "      COIN: " << pacman.GetCoin() << "       LIVE : " << pacman.GetLives() << std::endl;
+		else
+			std::cout << "CHASE! KILL THE GHOST! TIME LEFT: " << std::setw(4) <<pacman.GetChase() << std::endl;
+
+		if (!pacman.CheckLives())
+		{
+			system("cls");
+			std::cout << "GAME OVER"<<std::endl;
+			std::cout << "SCORE: " << pacman.GetFood() << std::endl;
+			system("pause");
+			break;
+		}
+
+		if (!field.CheckFood())
+		{
+			system("cls");
+			std::cout << "YOU WIN!" << std::endl;
+			break;
+		}
+
+		Sleep(TIME_SLEEP);
+		cursor.SetCursor(0, 0);
+	}
+
+	delete[] a_mas_ghost_;
 }
